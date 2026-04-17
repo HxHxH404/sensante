@@ -1,5 +1,4 @@
 import PatientCard from "@/components/PatientCard";
-
 export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 p-8">
@@ -10,9 +9,9 @@ export default function Home() {
         Patients
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <PatientCard nom="Aminata Sow" region="Dakar" age={34} />
-        <PatientCard nom="Ibrahima Ba" region="Thiès" age={45} />
-        <PatientCard nom="Awa Diallo" region="Saint-Louis" age={28} />
+        <PatientCard nom="Aminata Sow" region="Dakar" age={34} sexe="F" />
+        <PatientCard nom="Ibrahima Ba" region="Thiès" age={45} sexe="M" />
+        <PatientCard nom="Awa Diallo" region="Saint-Louis" age={28} sexe="F" />
       </div>
     </main>
   );
