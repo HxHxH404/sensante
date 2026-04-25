@@ -7,7 +7,8 @@ export default function PatientForm({ onSuccess }: { onSuccess: () => void }) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     const data = {
       nom: formData.get("nom"),
       prenom: formData.get("prenom"),
@@ -23,17 +24,17 @@ export default function PatientForm({ onSuccess }: { onSuccess: () => void }) {
       body: JSON.stringify(data),
     });
     if (res.ok) {
-      e.currentTarget.reset();
+      form.reset();
       onSuccess();
     }
     setLoading(false);
   }
 
   const regions = [
-    "Dakar", "Thiès", "Saint-Louis", "Ziguinchor",
+    "Dakar", "Thies", "Saint-Louis", "Ziguinchor",
     "Tambacounda", "Kaolack", "Louga", "Fatick",
-    "Kolda", "Matam", "Kaffrine", "Kédougou",
-    "Sédhiou", "Diourbel",
+    "Kolda", "Matam", "Kaffrine", "Kedougou",
+    "Sedhiou", "Diourbel",
   ];
 
   return (
@@ -41,5 +42,26 @@ export default function PatientForm({ onSuccess }: { onSuccess: () => void }) {
       <h3 className="text-lg font-bold text-gray-800">Nouveau patient</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input name="nom" placeholder="Nom" required className="p-3 border rounded-lg" />
-        <input name="prenom" placeholder="Prénom" required className="p-3 border
-
+        <input name="prenom" placeholder="Prenom" required className="p-3 border rounded-lg" />
+        <input name="dateNaissance" type="date" required className="p-3 border rounded-lg" />
+        <select name="sexe" required className="p-3 border rounded-lg">
+          <option value="">Sexe</option>
+          <option value="F">Femme</option>
+          <option value="M">Homme</option>
+        </select>
+        <input name="telephone" placeholder="Telephone (optionnel)" className="p-3 border rounded-lg" />
+        <select name="region" required className="p-3 border rounded-lg">
+          <option value="">Region</option>
+          {regions.map((r) => (
+            <option key={r} value={r}>{r}</option>
+          ))}
+        </select>
+      </div>
+      <input name="adresse" placeholder="Adresse (optionnel)" className="w-full p-3 border rounded-lg" />
+      <button type="submit" disabled={loading}
+        className="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 transition disabled:opacity-50">
+        {loading ? "Enregistrement..." : "Enregistrer"}
+      </button>
+    </form>
+  );
+}
