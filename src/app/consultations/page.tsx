@@ -10,12 +10,12 @@ export default function ConsultationsPage() {
         <ConsultationCard
           patient="Aminata Sow"
           date="18 mars 2025"
-          symptomes="Fièvre, toux, fatigue"
+          symptomes="Fievre, toux, fatigue"
           statut="termine" />
         <ConsultationCard
           patient="Ibrahima Ba"
           date="19 mars 2025"
-          symptomes="Maux de tête, vertiges"
+          symptomes="Maux de tete, vertiges"
           statut="en_attente" />
       </div>
     </div>
