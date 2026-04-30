@@ -1,3 +1,4 @@
+ auth/bouclier
 # Plan d'authentification — Lab Auth
 **Rôle :** Le Bouclier  
 **Auteur :** Pide Elodie AWISSOBA  
@@ -100,3 +101,19 @@ Utilisateur → page protégée sans session → middleware → redirige vers /l
 - Documentation officielle NextAuth.js : https://next-auth.js.org
 - Prisma Adapter pour NextAuth : https://authjs.dev/reference/adapter/prisma
 - Documentation bcryptjs : https://www.npmjs.com/package/bcryptjs
+
+# Plan Auth — Lab v0.3
+
+## Technologie choisie
+NextAuth.js
+
+## Étapes prévues
+1. Installer NextAuth : npm install next-auth
+2. Créer src/app/api/auth/[...nextauth]/route.ts
+3. Configurer le provider credentials (email + mot de passe)
+4. Protéger les routes avec middleware
+5. Connecter avec la base de données (table User dans Prisma)
+
+## Pages concernées
+- /login — formulaire de connexion
+ main
