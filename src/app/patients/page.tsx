@@ -1,7 +1,6 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import PatientCard from "@/components/PatientCard";
-import PatientForm from "@/components/PatientForm";
 
 interface Patient {
   id: number;
@@ -9,44 +8,29 @@ interface Patient {
   prenom: string;
   dateNaissance: string;
   sexe: string;
-  telephone: string | null;
-  adresse: string | null;
   region: string;
+  telephone: string;
 }
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
 
-  async function chargerPatients() {
+  async function charger() {
     const res = await fetch("/api/patients");
     const data = await res.json();
-    setPatients(data);
+    setPatients(Array.isArray(data) ? data : []);
     setLoading(false);
   }
 
   useEffect(() => {
-    chargerPatients();
+    charger();
   }, []);
-
-  function calculerAge(dateNaissance: string): number {
-    const naissance = new Date(dateNaissance);
-    const today = new Date();
-    let age = today.getFullYear() - naissance.getFullYear();
-    const m = today.getMonth() - naissance.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < naissance.getDate())) {
-      age--;
-    }
-    return age;
-  }
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Patients</h1>
-      <PatientForm onSuccess={chargerPatients} />
-      <h2 className="text-xl font-semibold text-gray-700 mt-8 mb-4">
-        Liste des patients ({patients.length})
-      </h2>
+
       {loading ? (
         <p className="text-gray-500">Chargement...</p>
       ) : patients.length === 0 ? (
@@ -54,13 +38,16 @@ export default function PatientsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {patients.map((p) => (
-            <PatientCard
+            <div
               key={p.id}
-              nom={`${p.prenom} ${p.nom}`}
-              region={p.region}
-              age={calculerAge(p.dateNaissance)}
-              sexe={p.sexe as "M" | "F"}
-            />
+              className="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-400"
+            >
+              <h3 className="font-bold text-gray-800">
+                {p.prenom} {p.nom}
+              </h3>
+              <p className="text-sm text-gray-500">{p.region}</p>
+              <p className="text-sm text-gray-500">{p.telephone}</p>
+            </div>
           ))}
         </div>
       )}
