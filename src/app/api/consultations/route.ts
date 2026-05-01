@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(consultation, { status: 201 });
-  } catch {
+   } catch {
     return NextResponse.json(
       { error: "Erreur lors de la création" },
       { status: 500 }
