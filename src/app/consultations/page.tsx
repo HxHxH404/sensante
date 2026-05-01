@@ -1,23 +1,58 @@
-import ConsultationCard from "@/components/ConsultationCard";
+import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
-export default function ConsultationsPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">
-        Consultations
-      </h1>
-      <div className="space-y-4">
-        <ConsultationCard
-          patient="Aminata Sow"
-          date="18 mars 2025"
-          symptomes="Fievre, toux, fatigue"
-          statut="termine" />
-        <ConsultationCard
-          patient="Ibrahima Ba"
-          date="19 mars 2025"
-          symptomes="Maux de tete, vertiges"
-          statut="en_attente" />
-      </div>
-    </div>
-  );
+// GET /api/consultations
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
+
+  const consultations = await prisma.consultation.findMany({
+    include: {
+      patient: true,
+      user: {
+        select: { nom: true, prenom: true, role: true },
+      },
+    },
+    orderBy: { date: "desc" },
+  });
+
+  return NextResponse.json(consultations);
+}
+
+// POST /api/consultations
+export async function POST(request: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user!.email as string },
+    });
+
+    const consultation = await prisma.consultation.create({
+      data: {
+        patientId: body.patientId,
+        userId: user!.id,
+        symptomes: body.symptomes,
+        notes: body.notes || null,
+        statut: "en_attente",
+      },
+      include: { patient: true },
+    });
+
+    return NextResponse.json(consultation, { status: 201 });
+  } catch {
+    return NextResponse.json(
+      { error: "Erreur lors de la création" },
+      { status: 500 }
+    );
+  }
 }
