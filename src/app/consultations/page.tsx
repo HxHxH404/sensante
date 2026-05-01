@@ -25,7 +25,7 @@ export default function ConsultationsPage() {
   async function charger() {
     const res = await fetch("/api/consultations");
     const data = await res.json();
-    setConsultations(data);
+    setConsultations(Array.isArray(data) ? data : []);
     setLoading(false);
   }
 
