@@ -1,0 +1,678 @@
+"""
+============================================================
+Module : tri_recherche_2d.py
+Description : Module de tri et de recherche dans une table
+              à deux dimensions (liste de listes).
+Auteur  : Module Python
+Date    : 2025
+============================================================
+
+UTILISATION :
+    import tri_recherche_2d as tr
+
+    table = tr.generer_table(4, 5, min_val=1, max_val=99)
+    tr.afficher_table(table)
+
+    # Tri
+    table_triee = tr.tri_bulle_2d(table)
+    table_triee = tr.tri_rapide_2d(table)
+    table_triee = tr.tri_selection_2d(table)
+    table_triee = tr.tri_insertion_2d(table)
+    table_triee = tr.tri_fusion_2d(table)
+
+    # Recherche (sur table aplatie triée)
+    flat = tr.aplatir(table_triee)
+    idx  = tr.recherche_lineaire(flat, valeur)
+    idx  = tr.recherche_binaire(flat, valeur)
+    idx  = tr.recherche_dichotomie(flat, valeur)
+============================================================
+"""
+
+import random
+import copy
+
+
+# ─────────────────────────────────────────────────────────
+# UTILITAIRES
+# ─────────────────────────────────────────────────────────
+
+def generer_table(lignes: int, colonnes: int,
+                  min_val: int = 1, max_val: int = 100) -> list[list[int]]:
+    """
+    Génère une table à deux dimensions remplie de valeurs entières aléatoires.
+
+    Paramètres :
+        lignes   : nombre de lignes de la table.
+        colonnes : nombre de colonnes de la table.
+        min_val  : valeur minimale (incluse).
+        max_val  : valeur maximale (incluse).
+
+    Retourne :
+        Une liste de listes d'entiers.
+
+    Exemple :
+        >>> table = generer_table(3, 4, 1, 50)
+        >>> len(table)       # 3 lignes
+        3
+        >>> len(table[0])    # 4 colonnes
+        4
+    """
+    return [
+        [random.randint(min_val, max_val) for _ in range(colonnes)]
+        for _ in range(lignes)
+    ]
+
+
+def afficher_table(table: list[list[int]], titre: str = "Table") -> None:
+    """
+    Affiche la table à deux dimensions de façon lisible dans la console.
+
+    Chaque ligne est affichée avec ses éléments séparés par des tabulations.
+    """
+    print(f"\n{'─' * 40}")
+    print(f"  {titre}")
+    print(f"{'─' * 40}")
+    for i, ligne in enumerate(table):
+        valeurs = "\t".join(f"{v:>4}" for v in ligne)
+        print(f"  Ligne {i} : {valeurs}")
+    print(f"{'─' * 40}\n")
+
+
+def aplatir(table: list[list[int]]) -> list[int]:
+    """
+    Convertit une table 2D en une liste 1D (ligne par ligne).
+
+    Exemple :
+        [[3, 1], [4, 2]]  →  [3, 1, 4, 2]
+    """
+    return [element for ligne in table for element in ligne]
+
+
+def reconstruire(flat: list[int], colonnes: int) -> list[list[int]]:
+    """
+    Reconstruit une table 2D à partir d'une liste 1D et du nombre de colonnes.
+
+    Exemple :
+        [1, 2, 3, 4], colonnes=2  →  [[1, 2], [3, 4]]
+    """
+    return [flat[i:i + colonnes] for i in range(0, len(flat), colonnes)]
+
+
+# ─────────────────────────────────────────────────────────
+# ■  ALGORITHMES DE TRI
+# ─────────────────────────────────────────────────────────
+#
+# Stratégie commune pour tous les tris 2D :
+#   1. Aplatir la table 2D en une liste 1D.
+#   2. Appliquer l'algorithme de tri sur cette liste 1D.
+#   3. Reconstruire la table 2D avec le même nombre de colonnes.
+#
+# Ainsi, les éléments sont triés dans l'ordre croissant
+# en parcourant la table ligne par ligne (ordre lexicographique
+# ligne-majeur).
+# ─────────────────────────────────────────────────────────
+
+
+# ══════════════════════════════════════════════════════════
+# 1. TRI À BULLES  (Bubble Sort)
+# ══════════════════════════════════════════════════════════
+
+def _tri_bulle_1d(lst: list[int]) -> list[int]:
+    """
+    Tri à bulles sur une liste 1D.
+
+    PRINCIPE :
+        On parcourt la liste plusieurs fois de gauche à droite.
+        À chaque passage, on compare chaque paire d'éléments
+        adjacents (lst[j] et lst[j+1]).
+        Si lst[j] > lst[j+1], on les échange.
+        Après le 1er passage, le plus grand élément « remonte »
+        (comme une bulle) jusqu'à la dernière position.
+        Après le 2e passage, le 2e plus grand est en avant-dernière
+        position, et ainsi de suite.
+        On répète n-1 fois (n = taille de la liste).
+
+    Complexité :
+        - Pire cas  : O(n²)  — liste triée en ordre inverse.
+        - Meilleur  : O(n)   — liste déjà triée (avec le flag).
+        - Espace    : O(1)   — tri en place.
+    """
+    n = len(lst)
+    lst = lst[:]  # copie pour ne pas modifier l'original
+
+    for i in range(n - 1):
+        # Après le i-ème passage, les i derniers éléments sont
+        # déjà à leur place définitive → inutile de les revisiter.
+        echange_effectue = False
+
+        for j in range(0, n - 1 - i):
+            # Si l'élément gauche est plus grand que son voisin droit,
+            # on les échange pour faire « monter » le plus grand.
+            if lst[j] > lst[j + 1]:
+                lst[j], lst[j + 1] = lst[j + 1], lst[j]
+                echange_effectue = True
+
+        # Optimisation : si aucun échange n'a eu lieu lors de ce
+        # passage, la liste est déjà triée → on arrête.
+        if not echange_effectue:
+            break
+
+    return lst
+
+
+def tri_bulle_2d(table: list[list[int]]) -> list[list[int]]:
+    """
+    Applique le tri à bulles sur une table 2D.
+
+    Exemple :
+        table = [[34, 7], [23, 1], [19, 45]]
+        → aplatit → [34, 7, 23, 1, 19, 45]
+        → trie    → [1, 7, 19, 23, 34, 45]
+        → reconstruit → [[1, 7], [19, 23], [34, 45]]
+    """
+    colonnes = len(table[0])
+    flat = aplatir(table)
+    flat_trie = _tri_bulle_1d(flat)
+    return reconstruire(flat_trie, colonnes)
+
+
+# ══════════════════════════════════════════════════════════
+# 2. TRI RAPIDE  (Quick Sort)
+# ══════════════════════════════════════════════════════════
+
+def _tri_rapide_1d(lst: list[int]) -> list[int]:
+    """
+    Tri rapide (Quick Sort) sur une liste 1D — version fonctionnelle.
+
+    PRINCIPE (diviser pour régner) :
+        1. Choisir un élément « pivot » dans la liste
+           (ici, l'élément médian pour équilibrer la récursion).
+        2. Partitionner la liste en trois sous-listes :
+             - gauche  : éléments strictement inférieurs au pivot.
+             - milieu  : éléments égaux au pivot.
+             - droite  : éléments strictement supérieurs au pivot.
+        3. Trier récursivement « gauche » et « droite ».
+        4. Concaténer : gauche_triée + milieu + droite_triée.
+
+    Complexité :
+        - Moyenne   : O(n log n).
+        - Pire cas  : O(n²) si le pivot est toujours le min ou le max.
+        - Espace    : O(log n) en moyenne (pile d'appels récursifs).
+    """
+    # Cas de base : une liste vide ou singleton est déjà triée.
+    if len(lst) <= 1:
+        return lst
+
+    # Choix du pivot : l'élément du milieu évite le pire cas
+    # sur les listes déjà (presque) triées.
+    pivot = lst[len(lst) // 2]
+
+    # Partitionnement en trois groupes.
+    gauche = [x for x in lst if x < pivot]   # inférieurs au pivot
+    milieu = [x for x in lst if x == pivot]  # égaux au pivot
+    droite = [x for x in lst if x > pivot]   # supérieurs au pivot
+
+    # Récursion + concaténation.
+    return _tri_rapide_1d(gauche) + milieu + _tri_rapide_1d(droite)
+
+
+def tri_rapide_2d(table: list[list[int]]) -> list[list[int]]:
+    """
+    Applique le tri rapide sur une table 2D.
+    """
+    colonnes = len(table[0])
+    flat = aplatir(table)
+    flat_trie = _tri_rapide_1d(flat)
+    return reconstruire(flat_trie, colonnes)
+
+
+# ══════════════════════════════════════════════════════════
+# 3. TRI PAR SÉLECTION  (Selection Sort)
+# ══════════════════════════════════════════════════════════
+
+def _tri_selection_1d(lst: list[int]) -> list[int]:
+    """
+    Tri par sélection sur une liste 1D.
+
+    PRINCIPE :
+        On divise la liste en deux parties :
+          - La partie gauche (indices 0..i-1) : déjà triée.
+          - La partie droite (indices i..n-1) : non triée.
+
+        À chaque étape i (de 0 à n-2) :
+          1. Trouver l'indice du minimum dans la partie droite.
+          2. Échanger cet élément minimum avec lst[i].
+          3. La partie triée s'agrandit d'un élément.
+
+        On « sélectionne » donc successivement les plus petits
+        éléments restants pour les placer à leur position finale.
+
+    Complexité :
+        - Toujours O(n²) comparaisons (même si la liste est triée).
+        - Espace : O(1) — tri en place.
+        - Avantage : nombre minimal d'échanges (au plus n-1).
+    """
+    n = len(lst)
+    lst = lst[:]  # copie
+
+    for i in range(n - 1):
+        # Chercher l'indice du minimum dans lst[i..n-1].
+        indice_min = i
+        for j in range(i + 1, n):
+            if lst[j] < lst[indice_min]:
+                indice_min = j
+
+        # Placer le minimum trouvé à la position i
+        # (seulement si ce n'est pas déjà lst[i]).
+        if indice_min != i:
+            lst[i], lst[indice_min] = lst[indice_min], lst[i]
+
+    return lst
+
+
+def tri_selection_2d(table: list[list[int]]) -> list[list[int]]:
+    """
+    Applique le tri par sélection sur une table 2D.
+    """
+    colonnes = len(table[0])
+    flat = aplatir(table)
+    flat_trie = _tri_selection_1d(flat)
+    return reconstruire(flat_trie, colonnes)
+
+
+# ══════════════════════════════════════════════════════════
+# 4. TRI PAR INSERTION  (Insertion Sort)
+# ══════════════════════════════════════════════════════════
+
+def _tri_insertion_1d(lst: list[int]) -> list[int]:
+    """
+    Tri par insertion sur une liste 1D.
+
+    PRINCIPE :
+        Similaire au tri de cartes à jouer dans la main :
+        on maintient une partie gauche déjà triée et on insère
+        chaque nouvel élément au bon endroit.
+
+        À chaque étape i (de 1 à n-1) :
+          1. Mémoriser lst[i] comme la « clé » (élément à insérer).
+          2. Décaler vers la droite tous les éléments de la partie
+             triée (lst[0..i-1]) qui sont supérieurs à la clé.
+          3. Insérer la clé dans l'espace libéré.
+
+    Complexité :
+        - Meilleur  : O(n)  — liste déjà triée (aucun décalage).
+        - Pire cas  : O(n²) — liste triée à l'envers.
+        - Espace    : O(1) — tri en place.
+        - Très efficace pour les petites listes ou presque triées.
+    """
+    lst = lst[:]  # copie
+
+    for i in range(1, len(lst)):
+        cle = lst[i]  # élément à placer au bon endroit
+
+        # Décaler les éléments plus grands que la clé
+        # d'une position vers la droite.
+        j = i - 1
+        while j >= 0 and lst[j] > cle:
+            lst[j + 1] = lst[j]
+            j -= 1
+
+        # Insérer la clé à sa position correcte.
+        lst[j + 1] = cle
+
+    return lst
+
+
+def tri_insertion_2d(table: list[list[int]]) -> list[list[int]]:
+    """
+    Applique le tri par insertion sur une table 2D.
+    """
+    colonnes = len(table[0])
+    flat = aplatir(table)
+    flat_trie = _tri_insertion_1d(flat)
+    return reconstruire(flat_trie, colonnes)
+
+
+# ══════════════════════════════════════════════════════════
+# 5. TRI PAR FUSION  (Merge Sort)
+# ══════════════════════════════════════════════════════════
+
+def _fusionner(gauche: list[int], droite: list[int]) -> list[int]:
+    """
+    Fusionne deux listes déjà triées en une seule liste triée.
+
+    PRINCIPE :
+        On utilise deux pointeurs (i pour gauche, j pour droite).
+        On compare les têtes des deux listes et on ajoute
+        le plus petit dans le résultat, puis on avance
+        le pointeur correspondant.
+        Quand une liste est épuisée, on ajoute le reste de l'autre.
+    """
+    resultat = []
+    i = j = 0
+
+    while i < len(gauche) and j < len(droite):
+        if gauche[i] <= droite[j]:
+            resultat.append(gauche[i])
+            i += 1
+        else:
+            resultat.append(droite[j])
+            j += 1
+
+    # Ajouter les éléments restants (un seul des deux blocs
+    # peut encore avoir des éléments).
+    resultat.extend(gauche[i:])
+    resultat.extend(droite[j:])
+    return resultat
+
+
+def _tri_fusion_1d(lst: list[int]) -> list[int]:
+    """
+    Tri par fusion sur une liste 1D.
+
+    PRINCIPE (diviser pour régner) :
+        1. DIVISER : couper la liste en deux moitiés égales.
+        2. RÉGNER  : trier récursivement chaque moitié.
+        3. FUSIONNER : combiner les deux moitiés triées en une
+                       seule liste triée grâce à la fonction
+                       _fusionner().
+
+        La récursion s'arrête quand la liste contient 0 ou 1
+        élément (cas de base, déjà trié).
+
+    Complexité :
+        - Toujours  : O(n log n) — optimal pour un tri par comparaison.
+        - Espace    : O(n) — nécessite de la mémoire supplémentaire
+                            pour les sous-listes temporaires.
+        - Stable    : les éléments égaux gardent leur ordre relatif.
+    """
+    # Cas de base.
+    if len(lst) <= 1:
+        return lst
+
+    # Trouver le point médian pour diviser la liste en deux.
+    milieu = len(lst) // 2
+    moitie_gauche = lst[:milieu]
+    moitie_droite = lst[milieu:]
+
+    # Trier récursivement chaque moitié.
+    gauche_triee = _tri_fusion_1d(moitie_gauche)
+    droite_triee = _tri_fusion_1d(moitie_droite)
+
+    # Fusionner les deux moitiés triées.
+    return _fusionner(gauche_triee, droite_triee)
+
+
+def tri_fusion_2d(table: list[list[int]]) -> list[list[int]]:
+    """
+    Applique le tri par fusion sur une table 2D.
+    """
+    colonnes = len(table[0])
+    flat = aplatir(table)
+    flat_trie = _tri_fusion_1d(flat)
+    return reconstruire(flat_trie, colonnes)
+
+
+# ─────────────────────────────────────────────────────────
+# ■  ALGORITHMES DE RECHERCHE
+# ─────────────────────────────────────────────────────────
+#
+# Les fonctions de recherche travaillent sur une liste 1D.
+# Pour rechercher dans une table 2D, il faut d'abord
+# l'aplatir avec aplatir().
+#
+# Remarque : la recherche binaire et la recherche par
+# dichotomie nécessitent une liste TRIÉE.
+# ─────────────────────────────────────────────────────────
+
+
+# ══════════════════════════════════════════════════════════
+# 1. RECHERCHE LINÉAIRE  (Linear Search)
+# ══════════════════════════════════════════════════════════
+
+def recherche_lineaire(lst: list[int], cible: int) -> int:
+    """
+    Recherche linéaire (séquentielle) d'un élément dans une liste.
+
+    PRINCIPE :
+        On parcourt la liste de gauche à droite, élément par
+        élément, jusqu'à trouver la cible ou atteindre la fin.
+
+        C'est l'algorithme de recherche le plus simple : aucune
+        hypothèse sur l'ordre des éléments (fonctionne sur
+        une liste non triée).
+
+    Complexité :
+        - Meilleur  : O(1)  — l'élément est en première position.
+        - Pire cas  : O(n)  — l'élément est en dernière position
+                              ou absent.
+        - Moyenne   : O(n/2) ≈ O(n).
+
+    Paramètres :
+        lst    : liste dans laquelle chercher.
+        cible  : valeur à trouver.
+
+    Retourne :
+        L'indice de la première occurrence de cible, ou -1 si
+        l'élément est absent.
+    """
+    for i in range(len(lst)):
+        # Comparer chaque élément avec la cible.
+        if lst[i] == cible:
+            return i  # trouvé → retourner l'indice
+
+    return -1  # pas trouvé
+
+
+def recherche_lineaire_2d(table: list[list[int]],
+                          cible: int) -> tuple[int, int] | None:
+    """
+    Recherche linéaire dans une table 2D.
+
+    Retourne un tuple (ligne, colonne) ou None si absent.
+    """
+    for i, ligne in enumerate(table):
+        for j, val in enumerate(ligne):
+            if val == cible:
+                return (i, j)
+    return None
+
+
+# ══════════════════════════════════════════════════════════
+# 2. RECHERCHE BINAIRE  (Binary Search — version itérative)
+# ══════════════════════════════════════════════════════════
+
+def recherche_binaire(lst: list[int], cible: int) -> int:
+    """
+    Recherche binaire (itérative) dans une liste TRIÉE.
+
+    PRINCIPE :
+        On maintient deux bornes : gauche (g) et droite (d).
+        À chaque étape :
+          1. Calculer l'indice médian : milieu = (g + d) // 2.
+          2. Comparer lst[milieu] avec la cible :
+               - lst[milieu] == cible → trouvé, retourner milieu.
+               - lst[milieu] <  cible → la cible est dans la
+                 moitié droite → g = milieu + 1.
+               - lst[milieu] >  cible → la cible est dans la
+                 moitié gauche → d = milieu - 1.
+          3. Répéter jusqu'à g > d (zone vide = absent).
+
+        À chaque itération, l'espace de recherche est divisé
+        par 2 → convergence rapide.
+
+    Complexité :
+        - Toujours  : O(log n).
+        - Espace    : O(1) — version itérative, pas de récursion.
+        ⚠ PRÉREQUIS : la liste doit être triée.
+
+    Paramètres :
+        lst    : liste TRIÉE dans laquelle chercher.
+        cible  : valeur à trouver.
+
+    Retourne :
+        L'indice de cible, ou -1 si absent.
+    """
+    gauche = 0
+    droite = len(lst) - 1
+
+    while gauche <= droite:
+        milieu = (gauche + droite) // 2
+
+        if lst[milieu] == cible:
+            return milieu              # trouvé
+        elif lst[milieu] < cible:
+            gauche = milieu + 1       # chercher à droite
+        else:
+            droite = milieu - 1       # chercher à gauche
+
+    return -1  # pas trouvé
+
+
+# ══════════════════════════════════════════════════════════
+# 3. RECHERCHE PAR DICHOTOMIE  (version récursive)
+# ══════════════════════════════════════════════════════════
+
+def recherche_dichotomie(lst: list[int], cible: int,
+                         gauche: int = 0,
+                         droite: int | None = None) -> int:
+    """
+    Recherche par dichotomie (récursive) dans une liste TRIÉE.
+
+    PRINCIPE :
+        Même logique que la recherche binaire, mais implémentée
+        de façon récursive :
+
+          - Cas de base : si gauche > droite, la cible est absente
+            → retourner -1.
+          - Calculer milieu = (gauche + droite) // 2.
+          - Si lst[milieu] == cible → trouvé.
+          - Si lst[milieu] <  cible → appel récursif sur la
+            moitié droite : (milieu+1, droite).
+          - Si lst[milieu] >  cible → appel récursif sur la
+            moitié gauche : (gauche, milieu-1).
+
+        « Dichotomie » vient du grec « dikha » (en deux) :
+        on coupe l'intervalle en deux à chaque appel.
+
+    Complexité :
+        - Toujours  : O(log n).
+        - Espace    : O(log n) — pile d'appels récursifs.
+        ⚠ PRÉREQUIS : la liste doit être triée.
+
+    Paramètres :
+        lst    : liste TRIÉE dans laquelle chercher.
+        cible  : valeur à trouver.
+        gauche : borne gauche de l'intervalle (défaut : 0).
+        droite : borne droite de l'intervalle (défaut : len-1).
+
+    Retourne :
+        L'indice de cible, ou -1 si absent.
+    """
+    # Initialisation de la borne droite au premier appel.
+    if droite is None:
+        droite = len(lst) - 1
+
+    # Cas de base : intervalle vide → élément absent.
+    if gauche > droite:
+        return -1
+
+    milieu = (gauche + droite) // 2
+
+    if lst[milieu] == cible:
+        return milieu                         # trouvé
+
+    elif lst[milieu] < cible:
+        # La cible est forcément dans la moitié droite.
+        return recherche_dichotomie(lst, cible, milieu + 1, droite)
+
+    else:
+        # La cible est forcément dans la moitié gauche.
+        return recherche_dichotomie(lst, cible, gauche, milieu - 1)
+
+
+# ─────────────────────────────────────────────────────────
+# ■  DÉMONSTRATION  (exécuté seulement si ce fichier est
+#    lancé directement, pas lors d'un import)
+# ─────────────────────────────────────────────────────────
+
+if __name__ == "__main__":
+
+    random.seed(42)  # graine fixe pour la reproductibilité
+
+    LIGNES   = 4
+    COLONNES = 5
+
+    # ── Génération ───────────────────────────────────────
+    print("=" * 55)
+    print("  DÉMONSTRATION DU MODULE tri_recherche_2d")
+    print("=" * 55)
+
+    table_originale = generer_table(LIGNES, COLONNES, 1, 99)
+    afficher_table(table_originale, "Table originale (aléatoire)")
+
+    # ── Tris ─────────────────────────────────────────────
+    algos_tri = [
+        ("Tri à bulles",       tri_bulle_2d),
+        ("Tri rapide",         tri_rapide_2d),
+        ("Tri par sélection",  tri_selection_2d),
+        ("Tri par insertion",  tri_insertion_2d),
+        ("Tri par fusion",     tri_fusion_2d),
+    ]
+
+    resultats_tris = {}
+    for nom, fonction in algos_tri:
+        resultat = fonction(table_originale)
+        resultats_tris[nom] = resultat
+        afficher_table(resultat, f"Résultat — {nom}")
+
+    # Vérification que tous les tris donnent le même résultat.
+    reference = aplatir(resultats_tris["Tri à bulles"])
+    tous_identiques = all(
+        aplatir(t) == reference for t in resultats_tris.values()
+    )
+    print(f"  ✔ Tous les tris donnent le même résultat : {tous_identiques}\n")
+
+    # ── Recherches ───────────────────────────────────────
+    # On utilise la table triée (issue du tri par fusion).
+    table_triee = resultats_tris["Tri par fusion"]
+    flat_trie   = aplatir(table_triee)
+
+    # Choisir une cible qui existe et une qui n'existe pas.
+    cible_existante  = flat_trie[len(flat_trie) // 2]  # élément du milieu
+    cible_inexistante = 0                               # 0 hors de [1,99]
+
+    print("=" * 55)
+    print("  RECHERCHE")
+    print("=" * 55)
+    print(f"  Liste triée  : {flat_trie}")
+    print(f"  Cible #1 (présente)  : {cible_existante}")
+    print(f"  Cible #2 (absente)   : {cible_inexistante}\n")
+
+    algos_recherche = [
+        ("Recherche linéaire",       recherche_lineaire),
+        ("Recherche binaire",        recherche_binaire),
+        ("Recherche par dichotomie", recherche_dichotomie),
+    ]
+
+    for cible, label in [(cible_existante,  "présente"),
+                         (cible_inexistante, "absente")]:
+        print(f"  ─── Cible {cible} ({label}) ───")
+        for nom, fonction in algos_recherche:
+            idx = fonction(flat_trie, cible)
+            if idx == -1:
+                print(f"    {nom:<30} → non trouvée")
+            else:
+                print(f"    {nom:<30} → indice {idx}  "
+                      f"(valeur : {flat_trie[idx]})")
+        print()
+
+    # ── Recherche 2D ─────────────────────────────────────
+    print("  ─── Recherche linéaire 2D ───")
+    pos = recherche_lineaire_2d(table_originale, cible_existante)
+    if pos:
+        print(f"    {cible_existante} trouvé dans la table originale "
+              f"à la position (ligne={pos[0]}, colonne={pos[1]})")
+    else:
+        print(f"    {cible_existante} absent de la table originale.")
+    print()
