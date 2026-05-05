@@ -13,7 +13,7 @@ Règles :
 - Tu tiens compte du contexte sénégalais (paludisme, dengue, etc.).
 - Tu NE poses PAS de diagnostic définitif.
 
-Réponds UNIQUEMENT en JSON valide :
+Réponds UNIQUEMENT en JSON valide sans backticks sans markdown :
 {
   "diagnostic": "description du pré-diagnostic",
   "confiance": nombre_entre_0_et_100,
@@ -40,7 +40,7 @@ export async function analyserSymptomes(
   const userMessage = `Patient : ${patient.prenom} ${patient.nom}
 Âge : ${patient.age} ans | Sexe : ${patient.sexe} | Région : ${patient.region}
 Symptômes : ${symptomes.join(", ")}
-${notes ? `Notes : ${notes}` : ""}
+${notes ? `Notes : ${notes}` : "Aucune note."}
 Propose un pré-diagnostic.`;
 
   const completion = await groq.chat.completions.create({
@@ -54,10 +54,26 @@ Propose un pré-diagnostic.`;
   });
 
   const response = completion.choices[0]?.message?.content || "{}";
+  
+  console.log("=== REPONSE GROQ BRUTE ===");
+  console.log(response);
+  console.log("==========================");
+
+  const cleaned = response
+    .replace(/```json\s*/gi, "")
+    .replace(/```\s*/g, "")
+    .trim();
+
+  console.log("=== REPONSE NETTOYEE ===");
+  console.log(cleaned);
+  console.log("========================");
 
   try {
-    return JSON.parse(response);
-  } catch {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    console.log("=== ERREUR JSON.PARSE ===");
+    console.log(e);
+    console.log("=========================");
     return {
       diagnostic: "Analyse impossible. Réessayez.",
       confiance: 0,
