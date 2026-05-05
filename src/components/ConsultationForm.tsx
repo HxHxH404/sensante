@@ -31,7 +31,7 @@ export default function ConsultationForm({
       credentials: "include",
     })
       .then((res) => res.json())
-      .then(setPatients);
+      .then((data) => setPatients(Array.isArray(data) ? data : []));
   }, []);
 
   function toggleSymptome(s: string) {
