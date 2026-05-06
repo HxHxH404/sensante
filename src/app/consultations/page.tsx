@@ -23,10 +23,17 @@ export default function ConsultationsPage() {
   const [loading, setLoading] = useState(true);
 
   async function charger() {
-    const res = await fetch("/api/consultations");
-    const data = await res.json();
-    setConsultations(data);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/consultations");
+      if (!res.ok) throw new Error("Erreur serveur");
+      const data = await res.json();
+      setConsultations(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Erreur :", error);
+      setConsultations([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { charger(); }, []);
@@ -73,12 +80,12 @@ export default function ConsultationsPage() {
               {c.notes && (
                 <p className="text-sm text-gray-600 mt-3 italic">{c.notes}</p>
               )}
-             <DiagnosticIA
-  consultationId={c.id}
-  diagnosticExistant={c.diagnosticIa}
-  confianceExistante={c.confiance}
-  onDiagnostic={charger}
-/>
+              <DiagnosticIA
+                consultationId={c.id}
+                diagnosticExistant={c.diagnosticIa}
+                confianceExistante={c.confiance}
+                onDiagnostic={charger}
+              />
             </div>
           ))}
         </div>
