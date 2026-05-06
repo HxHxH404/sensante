@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import StatCard from "@/components/StatCard";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -28,19 +30,27 @@ interface Stats {
 const COULEURS_PIE = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D"];
 
 export default function DashboardPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/stats")
-      .then((res) => res.json())
-      .then((data) => {
-        setStats(data);
-        setLoading(false);
-      });
-  }, []);
+    if (status === "unauthenticated") {
+      router.push("/login");
+      return;
+    }
+    if (status === "authenticated") {
+      fetch("/api/stats")
+        .then((res) => res.json())
+        .then((data) => {
+          setStats(data);
+          setLoading(false);
+        });
+    }
+  }, [status, router]);
 
-  if (loading) return <p className="text-gray-500">Chargement du dashboard...</p>;
+  if (status === "loading" || loading) return <p className="text-gray-500">Chargement du dashboard...</p>;
   if (!stats) return null;
 
   return (
