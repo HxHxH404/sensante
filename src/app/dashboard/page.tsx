@@ -30,18 +30,16 @@ interface Stats {
 const COULEURS_PIE = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D"];
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
+      return;
     }
-  }, [status]);
-
-  useEffect(() => {
     if (status === "authenticated") {
       fetch("/api/stats")
         .then((res) => res.json())
@@ -50,10 +48,9 @@ export default function DashboardPage() {
           setLoading(false);
         });
     }
-  }, [status]);
+  }, [status, router]);
 
-  if (status === "loading" || !session) return null;
-  if (loading) return <p className="text-gray-500">Chargement du dashboard...</p>;
+  if (status === "loading" || loading) return <p className="text-gray-500">Chargement du dashboard...</p>;
   if (!stats) return null;
 
   return (
