@@ -1,0 +1,51 @@
+# 1. Définition du graphe (Données)
+grap = {
+    "A" : {"B":6, "C":2, "D":4, "E":5},
+    "B" : {"A":6, "C":4, "D":2, "E":6},
+    "C" : {"A":2, "B":4, "D":5, "E":3},
+    "D" : {"A":4, "B":2, "C":5, "E":4},
+    "E" : {"A":5, "B":6, "C":3, "D":4}
+}
+
+# 2. Fonction Récursive
+def recursive(grap, depart, ll=[], val=4):
+    d = 0
+    # Condition d'arrêt : si la liste contient 'val' éléments (tous les nœuds visités sauf le dernier)
+    if (ll.__len__() == val):
+        ll.append(depart)
+        print(ll)
+        d = grap[depart][ll[0]] # Retour au point de départ
+        return d
+    else : 
+        # Copie du graphe pour ne pas modifier l'original tout de suite
+        list_ = {}
+        list_ = grap[depart].copy()
+         
+        # Retirer les nœuds déjà visités des voisins disponibles
+        for i in ll:
+            if (i == depart):
+                continue
+            list_.pop(i)  
+        
+        print(list_) 
+        
+        # Ajouter le nœud courant au chemin
+        ll.append(depart)
+        print(ll)
+        
+        # Trouver le voisin le plus proche (min)
+        i, p = min(list_.items(), key=lambda x: x[1])
+        
+        # Préparer la récursion
+        list_.pop(i)
+        grap.pop(depart) # Attention : cela modifie le graphe global !
+        depart = i        
+        print(i, p)
+        
+        # Appel récursif
+        d = d + p
+        return d + recursive(grap, depart, ll)
+
+# 3. Exécution
+x = recursive(grap, "A")
+print(f"Distance totale : {x}")

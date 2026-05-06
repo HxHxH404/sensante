@@ -27,7 +27,9 @@ export default function ConsultationForm({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/patients")
+    fetch("/api/patients", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setPatients(Array.isArray(data) ? data : []));
   }, []);

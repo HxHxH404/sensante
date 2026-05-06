@@ -49,9 +49,7 @@ export default function DiagnosticIA({
         <p className="font-bold text-teal-800">Diagnostic IA</p>
         <p className="text-sm text-gray-700 mt-1">{diagnosticExistant}</p>
         <p className="text-xs text-gray-500 mt-1">Confiance : {confianceExistante}%</p>
-        <p className="text-xs text-gray-400 italic mt-2">
-          Ceci n'est pas un diagnostic médical.
-        </p>
+        <p className="text-xs text-gray-400 italic mt-2">Ceci n'est pas un diagnostic médical.</p>
       </div>
     );
   }
@@ -73,8 +71,7 @@ export default function DiagnosticIA({
             <span className={`text-xs px-2 py-1 rounded-full font-bold ${
               resultat.urgence === "urgent" ? "bg-red-200 text-red-800"
               : resultat.urgence === "moyen" ? "bg-orange-200 text-orange-800"
-              : "bg-green-200 text-green-800"
-            }`}>
+              : "bg-green-200 text-green-800"}`}>
               {resultat.urgence.toUpperCase()}
             </span>
           </div>
@@ -86,9 +83,7 @@ export default function DiagnosticIA({
               <div className="bg-orange-500 h-2 rounded-full" style={{ width: `${resultat.confiance}%` }}></div>
             </div>
           </div>
-          <p className="text-xs text-gray-400 italic mt-3">
-            Ceci n'est pas un diagnostic médical. Consultez un professionnel de santé.
-          </p>
+          <p className="text-xs text-gray-400 italic mt-3">Ceci n'est pas un diagnostic médical. Consultez un professionnel de santé.</p>
         </div>
       )}
     </div>
