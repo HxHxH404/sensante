@@ -1,7 +1,13 @@
 import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { PrismaPg } from "@prisma/adapter-pg";
+import * as dotenv from "dotenv";
+dotenv.config();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  const user = await prisma.user.findFirst();
+
   const consultations = [
     { patientId: 11, symptomes: "Fièvre, Toux", notes: "Infection respiratoire", date: new Date("2026-01-10") },
     { patientId: 12, symptomes: "Douleur abdominale", notes: "Douleurs abdominales", date: new Date("2026-01-22") },
@@ -15,7 +21,7 @@ async function main() {
     { patientId: 20, symptomes: "Douleur abdominale", notes: "Douleurs multiples", date: new Date("2026-05-06") },
   ];
   for (const c of consultations) {
-    await prisma.consultation.create({ data: { patientId: c.patientId, symptomes: c.symptomes, notes: c.notes, statut: "en_attente", date: c.date } });
+    await prisma.consultation.create({ data: { patientId: c.patientId, userId: user.id, symptomes: c.symptomes, notes: c.notes, statut: "en_attente", date: c.date } });
     console.log("Consultation créée pour patient ID " + c.patientId);
   }
 }
