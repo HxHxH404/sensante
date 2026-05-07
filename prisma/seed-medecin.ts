@@ -4,10 +4,9 @@ import * as dotenv from "dotenv";
 dotenv.config();
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
-
 async function main() {
   const user = await prisma.user.findFirst();
-
+  if (!user) throw new Error("Aucun utilisateur trouvé dans la BDD");
   const consultations = [
     { patientId: 11, symptomes: "Fièvre, Toux", notes: "Infection respiratoire", date: new Date("2026-01-10") },
     { patientId: 12, symptomes: "Douleur abdominale", notes: "Douleurs abdominales", date: new Date("2026-01-22") },
