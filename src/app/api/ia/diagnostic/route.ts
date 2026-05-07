@@ -3,28 +3,25 @@ import { analyserSymptomes } from "@/lib/groq";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
-
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
-
   try {
     const { consultationId } = await request.json();
-
     const consultation = await prisma.consultation.findUnique({
       where: { id: consultationId },
       include: { patient: true },
     });
-
     if (!consultation) {
       return NextResponse.json({ error: "Consultation introuvable" }, { status: 404 });
     }
-
     const naissance = new Date(consultation.patient.dateNaissance);
     const age = new Date().getFullYear() - naissance.getFullYear();
-
+    const symptomes = Array.isArray(consultation.symptomes)
+      ? consultation.symptomes as string[]
+      : (consultation.symptomes as string).split(",").map(s => s.trim());
     const resultat = await analyserSymptomes(
       {
         nom: consultation.patient.nom,
@@ -33,10 +30,9 @@ export async function POST(request: Request) {
         sexe: consultation.patient.sexe,
         region: consultation.patient.region,
       },
-      consultation.symptomes as string[],
+      symptomes,
       consultation.notes
     );
-
     const updated = await prisma.consultation.update({
       where: { id: consultationId },
       data: {
@@ -46,9 +42,7 @@ export async function POST(request: Request) {
       },
       include: { patient: true },
     });
-
     return NextResponse.json({ ...resultat, consultation: updated });
-
   } catch (error) {
     return NextResponse.json({ error: "Erreur lors de l'analyse IA" }, { status: 500 });
   }
