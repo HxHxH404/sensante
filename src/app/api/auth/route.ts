@@ -1,1 +1,1 @@
-//NextAuth sera configuré dans le Lab Auth
+export {};//NextAuth sera configuré dans le Lab Auth
