@@ -6,7 +6,7 @@ import DiagnosticIA from "@/components/DiagnosticIA";
 interface Consultation {
   id: number;
   date: string;
-  symptomes: string[];
+  symptomes: string | string[];
   diagnosticIa: string | null;
   confiance: number | null;
   statut: string;
