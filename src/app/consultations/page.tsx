@@ -2,10 +2,11 @@
 import { useEffect, useState } from "react";
 import ConsultationForm from "@/components/ConsultationForm";
 import DiagnosticIA from "@/components/DiagnosticIA";
+
 interface Consultation {
   id: number;
   date: string;
-  symptomes: string;
+  symptomes: string[];
   diagnosticIa: string | null;
   confiance: number | null;
   statut: string;
@@ -16,9 +17,11 @@ interface Consultation {
     region: string;
   };
 }
+
 export default function ConsultationsPage() {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
+
   async function charger() {
     try {
       const res = await fetch("/api/consultations");
@@ -32,7 +35,9 @@ export default function ConsultationsPage() {
       setLoading(false);
     }
   }
+
   useEffect(() => { charger(); }, []);
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Consultations</h1>
@@ -66,9 +71,9 @@ export default function ConsultationsPage() {
                 </span>
               </div>
               <div className="flex flex-wrap gap-2 mt-3">
-                {String(c.symptomes).split(",").map((s, i) => (
+              {(typeof c.symptomes === "string" ? c.symptomes.split(",") : (c.symptomes as string[])).map((s, i) => (
                   <span key={i} className="bg-orange-50 text-orange-700 text-xs px-2 py-1 rounded-full">
-                    {s.trim()}
+                    {s}
                   </span>
                 ))}
               </div>
