@@ -71,7 +71,7 @@ export default function ConsultationsPage() {
                 </span>
               </div>
               <div className="flex flex-wrap gap-2 mt-3">
-                {(typeof c.symptomes === "string" ? c.symptomes.split(",") : c.symptomes).map((s, i) => (
+              {(typeof c.symptomes === "string" ? c.symptomes.split(",") : (c.symptomes as string[])).map((s, i) => (
                   <span key={i} className="bg-orange-50 text-orange-700 text-xs px-2 py-1 rounded-full">
                     {s}
                   </span>
