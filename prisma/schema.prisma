@@ -36,6 +36,7 @@ model Consultation {
   symptomes    Json
   diagnosticIa String?
   confiance    Float?
+  urgence      String?
   statut       String   @default("en_attente")
   notes        String?
   patient      Patient  @relation(fields: [patientId], references: [id])
