@@ -16,14 +16,17 @@ export default function Header() {
               {session.user?.name}
             </span>
             <button
-              onClick={() => signOut()}
-              className="text-sm bg-teal-600 px-3 py-1 rounded hover:bg-teal-500 transition">
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="text-sm bg-teal-600 px-3 py-1 rounded hover:bg-teal-500 transition"
+            >
               Déconnexion
             </button>
           </>
         ) : (
-          <Link href="/login"
-            className="text-sm bg-teal-600 px-3 py-1 rounded hover:bg-teal-500 transition">
+          <Link
+            href="/login"
+            className="text-sm bg-teal-600 px-3 py-1 rounded hover:bg-teal-500 transition"
+          >
             Se connecter
           </Link>
         )}

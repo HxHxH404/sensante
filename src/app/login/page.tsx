@@ -2,13 +2,11 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -16,6 +14,7 @@ export default function LoginPage() {
     setError("");
 
     const formData = new FormData(e.currentTarget);
+
     const res = await signIn("credentials", {
       email: formData.get("email"),
       password: formData.get("password"),
@@ -24,10 +23,11 @@ export default function LoginPage() {
 
     if (res?.error) {
       setError("Email ou mot de passe incorrect");
+      setLoading(false);
     } else {
-      router.push("/patients");
+      // Force un rechargement complet pour que le middleware voie la session
+      window.location.href = "/patients";
     }
-    setLoading(false);
   }
 
   return (
