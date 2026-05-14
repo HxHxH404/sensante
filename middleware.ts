@@ -11,5 +11,6 @@ export const config = {
     "/patients/:path*",
     "/consultations/:path*",
     "/dashboard/:path*",
+    "/profil/:path*",
   ],
 }
