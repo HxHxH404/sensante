@@ -37,8 +37,9 @@ export async function POST(request: Request) {
       where: { id: consultationId },
       data: {
         diagnosticIa: resultat.diagnostic,
-        confiance: resultat.confiance,
-        statut: "termine",
+  	confiance: resultat.confiance,
+  	urgence: resultat.urgence,
+  	statut: "termine",
       },
       include: { patient: true },
     });

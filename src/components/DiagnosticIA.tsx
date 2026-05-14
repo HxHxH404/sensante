@@ -5,6 +5,7 @@ interface DiagnosticIAProps {
   consultationId: number;
   diagnosticExistant: string | null;
   confianceExistante: number | null;
+  urgenceExistante: string | null;
   onDiagnostic: () => void;
 }
 
@@ -12,6 +13,7 @@ export default function DiagnosticIA({
   consultationId,
   diagnosticExistant,
   confianceExistante,
+  urgenceExistante,
   onDiagnostic,
 }: DiagnosticIAProps) {
   const [loading, setLoading] = useState(false);
@@ -46,7 +48,17 @@ export default function DiagnosticIA({
   if (diagnosticExistant) {
     return (
       <div className="mt-3 p-4 rounded-lg border-l-4 border-teal-500 bg-teal-50">
-        <p className="font-bold text-teal-800">Diagnostic IA</p>
+        <div className="flex justify-between items-center">
+          <p className="font-bold text-teal-800">Diagnostic IA</p>
+          {urgenceExistante && (
+            <span className={`text-xs px-2 py-1 rounded-full font-bold ${
+              urgenceExistante === "urgent" ? "bg-red-200 text-red-800"
+              : urgenceExistante === "moyen" ? "bg-orange-200 text-orange-800"
+              : "bg-green-200 text-green-800"}`}>
+              {urgenceExistante.toUpperCase()}
+            </span>
+          )}
+        </div>
         <p className="text-sm text-gray-700 mt-1">{diagnosticExistant}</p>
         <p className="text-xs text-gray-500 mt-1">Confiance : {confianceExistante}%</p>
         <p className="text-xs text-gray-400 italic mt-2">Ceci n'est pas un diagnostic médical.</p>

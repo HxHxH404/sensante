@@ -7,6 +7,7 @@ interface Consultation {
   id: number;
   date: string;
   symptomes: string | string[];
+  urgence: string | null;
   diagnosticIa: string | null;
   confiance: number | null;
   statut: string;
@@ -84,6 +85,7 @@ export default function ConsultationsPage() {
                 consultationId={c.id}
                 diagnosticExistant={c.diagnosticIa}
                 confianceExistante={c.confiance}
+                urgenceExistante={c.urgence}
                 onDiagnostic={charger}
               />
             </div>
