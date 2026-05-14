@@ -62,3 +62,50 @@ npm run dev
 
 ## Équipe
 Licence 3 GLSI — ESP/UCAD — 2025–2026
+## 🐳 Lancer avec Docker
+
+### Prérequis
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installé et démarré
+
+### Démarrage
+
+1. Clonez le projet :
+```bash
+   git clone <url-du-repo>
+   cd sensante
+```
+
+2. Lancez l'application :
+```bash
+   docker compose up --build
+```
+
+3. Créez les tables (première fois uniquement) :
+```bash
+   docker compose exec app npx prisma db push
+```
+
+4. Ouvrez [http://localhost:3000](http://localhost:3000)
+
+### Arrêter l'application
+```bash
+docker compose down
+```
+
+> Les données sont persistantes grâce au volume `pgdata`.
+## ✅ Fonctionnalités
+
+- Inscription et connexion sécurisée (NextAuth.js)
+- Gestion des patients (14 régions du Sénégal)
+- Consultations avec sélection de symptômes
+- Diagnostic IA automatique (Llama 3 via Groq)
+- Dashboard avec statistiques et graphiques (Recharts)
+- Conteneurisé avec Docker et Docker Compose
+
+## 🛠️ Stack technique
+
+- **Frontend** : Next.js 14 — Tailwind CSS — Recharts
+- **Backend** : Prisma — PostgreSQL
+- **Auth** : NextAuth.js
+- **IA** : Groq API (Llama 3)
+- **Déploiement** : Docker — Docker Compose
